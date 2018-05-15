@@ -1,0 +1,39 @@
+- name: Deploy project
+  hosts: all
+  vars_files:
+    - ./vars.yml
+  vars:
+    project_root: '{{ docker_root }}/{{ project_name }}'
+    dhparams: '{{ project_root}}/compose/nginx/dhparams.pem'
+  gather_facts: false
+
+  tasks:
+    - name: Git checkout {{ project_name }}
+      git:
+        repo: '{{ git_repo }}'
+        dest: '{{ project_root }}'
+
+    - name: Template .env file
+      template:
+        src: 'templates/env.jinja2'
+        dest: '{{ docker_root}}/{{ project_name }}/.env'
+
+    - name: Generate dhparams.pem (this may take a while)
+      command: 'openssl dhparam -out {{ dhparams }} 2048'
+      args:
+        creates: '{{ dhparams }}'
+
+    - name: Build project {{ project_name }}
+      command: 'docker-compose build'
+      args:
+        chdir: '{{ project_root }}'
+
+    - name: Run project {{ project_name }} using docker-compose.yml & docker-compose.prod.yml
+      command: 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
+      args:
+        chdir: '{{ project_root }}'
+
+    - name: Run migrations for project {{ project_name }}
+      command: 'docker-compose run --rm django python manage.py migrate'
+      args:
+        chdir: '{{ project_root }}'
