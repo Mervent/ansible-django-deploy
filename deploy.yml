@@ -12,6 +12,7 @@
       git:
         repo: '{{ git_repo }}'
         dest: '{{ project_root }}'
+        accept_hostkey: yes
 
     - name: Template .env file
       template:
