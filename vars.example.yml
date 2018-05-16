@@ -1,0 +1,11 @@
+# General
+docker_root: '/docker'
+project_name: 'myproject'
+git_repo: 'git@github.com:Mervent/ansible-django-deploy.git'
+
+# Django specific
+django_postgres_passwd: ''
+django_secret_key: ''
+django_sentry_dsn: ''
+django_allowed_hosts : ''
+django_admin_url: 'admin/'
